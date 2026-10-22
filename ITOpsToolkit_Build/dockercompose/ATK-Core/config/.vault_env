@@ -1,0 +1,7 @@
+# Backend -> Vault. Internal Docker address — Vault is in this same compose
+# project, so this does NOT change to vault-atkdev.fd.com. That DNS name exists
+# only so humans can reach the Vault UI through nginx.
+# [C] EXISTING VAULT? Point VAULT_URL at your external Vault server instead.
+VAULT_URL=http://vault:8200
+ENGINE=secret
+VAULT_TOKEN=<Vault Root Token>

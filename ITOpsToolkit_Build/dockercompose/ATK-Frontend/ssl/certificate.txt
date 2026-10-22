@@ -1,0 +1,12 @@
+<SSL Certificate Notes — FRONTEND machine (10.106.6.228)>
+
+Place your wildcard *.fd.com certificate here as:
+  fullchain.pem
+  privkey.pem
+
+This is the SAME pair used on the core machine (../ATK-Core/ssl/). It is
+mounted into the nginx container at /etc/nginx/ssl/ and serves:
+  atkdev.fd.com
+
+If you later switch to per-hostname certificates, this machine only needs the
+cert for atkdev.fd.com.
