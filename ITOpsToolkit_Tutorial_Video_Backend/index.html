@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Video Streaming Player</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 20px;
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+
+            header {
+                text-align: center;
+                color: white;
+                margin-bottom: 40px;
+            }
+
+            h1 {
+                font-size: 2.5em;
+                margin-bottom: 10px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+
+            .content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+                margin-bottom: 30px;
+            }
+
+            .player-section,
+            .list-section {
+                background: white;
+                border-radius: 12px;
+                padding: 25px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            }
+
+            .player-section h2,
+            .list-section h2 {
+                color: #333;
+                margin-bottom: 20px;
+                font-size: 1.5em;
+                border-bottom: 3px solid #667eea;
+                padding-bottom: 10px;
+            }
+
+            video {
+                width: 100%;
+                height: auto;
+                background: #000;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+
+            .controls {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            .form-group {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            label {
+                font-size: 0.9em;
+                color: #555;
+                font-weight: 600;
+            }
+
+            input[type='text'],
+            select {
+                padding: 10px 12px;
+                border: 2px solid #e0e0e0;
+                border-radius: 6px;
+                font-size: 0.95em;
+                transition: border-color 0.3s;
+            }
+
+            input[type='text']:focus,
+            select:focus {
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            button {
+                padding: 10px 20px;
+                background: #667eea;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 0.95em;
+                transition: all 0.3s;
+                grid-column: span 2;
+            }
+
+            button:hover {
+                background: #5568d3;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            }
+
+            button:active {
+                transform: translateY(0);
+            }
+
+            .video-list {
+                max-height: 600px;
+                overflow-y: auto;
+                border: 2px solid #f0f0f0;
+                border-radius: 8px;
+                padding: 0;
+            }
+
+            .video-item {
+                padding: 15px;
+                border-bottom: 1px solid #f0f0f0;
+                cursor: pointer;
+                transition: all 0.3s;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .video-item:hover {
+                background: #f8f9fa;
+                padding-left: 20px;
+            }
+
+            .video-info {
+                flex: 1;
+            }
+
+            .video-name {
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 5px;
+                word-break: break-word;
+            }
+
+            .video-size {
+                font-size: 0.85em;
+                color: #999;
+            }
+
+            .play-btn {
+                background: #667eea;
+                color: white;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 0.9em;
+                white-space: nowrap;
+                transition: all 0.3s;
+                margin-left: 10px;
+            }
+
+            .play-btn:hover {
+                background: #5568d3;
+                transform: scale(1.05);
+            }
+
+            .search-container {
+                margin-bottom: 15px;
+            }
+
+            .search-box {
+                width: 100%;
+                padding: 12px;
+                border: 2px solid #e0e0e0;
+                border-radius: 6px;
+                font-size: 0.95em;
+            }
+
+            .status-message {
+                padding: 12px;
+                border-radius: 6px;
+                margin-bottom: 15px;
+                display: none;
+            }
+
+            .status-message.success {
+                background: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+                display: block;
+            }
+
+            .status-message.error {
+                background: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+                display: block;
+            }
+
+            .status-message.info {
+                background: #d1ecf1;
+                color: #0c5460;
+                border: 1px solid #bee5eb;
+                display: block;
+            }
+
+            .loading {
+                text-align: center;
+                padding: 20px;
+                color: #667eea;
+                font-weight: 600;
+            }
+
+            .spinner {
+                display: inline-block;
+                width: 20px;
+                height: 20px;
+                border: 3px solid #f0f0f0;
+                border-top: 3px solid #667eea;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin-right: 10px;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .currently-playing {
+                background: #667eea;
+                color: white;
+                padding: 12px;
+                border-radius: 6px;
+                margin-bottom: 15px;
+                display: none;
+            }
+
+            .currently-playing.active {
+                display: block;
+            }
+
+            @media (max-width: 768px) {
+                .content {
+                    grid-template-columns: 1fr;
+                }
+
+                h1 {
+                    font-size: 1.8em;
+                }
+
+                .controls {
+                    grid-template-columns: 1fr;
+                }
+
+                button {
+                    grid-column: span 1;
+                }
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 40px 20px;
+                color: #999;
+            }
+
+            .empty-state p {
+                font-size: 0.95em;
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>🎬 Video Streaming Player</h1>
+                <p>Stream videos with efficient chunked delivery</p>
+            </header>
+
+            <div class="content">
+                <!-- Player Section -->
+                <div class="player-section">
+                    <h2>Video Player</h2>
+
+                    <div class="status-message" id="playerStatus"></div>
+
+                    <video id="videoPlayer" controls playsinline>
+                        <source id="videoSource" src="" type="video/mp4" />
+                        Your browser does not support the video tag.
+                    </video>
+
+                    <div class="currently-playing" id="nowPlaying"></div>
+
+                    <div class="controls">
+                        <div class="form-group">
+                            <label for="urlInput">Video URL:</label>
+                            <input type="text" id="urlInput" placeholder="e.g., http://localhost:3000/api/stream/video.mp4" value="" />
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button onclick="playFromUrl()">Play from URL</button>
+                        </div>
+                    </div>
+
+                    <div class="controls">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button onclick="stopVideo()" style="background: #dc3545">Stop Video</button>
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button onclick="location.reload()">Refresh</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video List Section -->
+                <div class="list-section">
+                    <h2>Available Videos</h2>
+
+                    <div class="search-container">
+                        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search videos..." onkeyup="searchVideos()" />
+                    </div>
+
+                    <div id="videoListContainer" class="video-list">
+                        <div class="loading"><span class="spinner"></span>Loading videos...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            let allVideos = [];
+
+            // Load videos on page load
+            document.addEventListener('DOMContentLoaded', () => {
+                loadVideos();
+                // Auto-refresh list every 30 seconds
+                setInterval(loadVideos, 30000);
+            });
+
+            async function loadVideos() {
+                try {
+                    const response = await fetch('/api/videos');
+                    const data = await response.json();
+
+                    if (data.success) {
+                        allVideos = data.videos;
+                        displayVideos(allVideos);
+                        showStatus('Videos loaded successfully!', 'success', 'videoList');
+                    } else {
+                        showStatus('Failed to load videos', 'error', 'videoList');
+                    }
+                } catch (error) {
+                    console.error('Error loading videos:', error);
+                    showStatus('Error connecting to server', 'error', 'videoList');
+                    document.getElementById('videoListContainer').innerHTML = `
+          <div class="empty-state">
+            <p>❌ Failed to connect to server</p>
+            <p style="font-size: 0.85em;">Make sure the server is running on http://localhost:3000</p>
+          </div>
+        `;
+                }
+            }
+
+            function displayVideos(videos) {
+                const container = document.getElementById('videoListContainer');
+
+                if (videos.length === 0) {
+                    container.innerHTML = `
+          <div class="empty-state">
+            <p>📭 No videos found</p>
+            <p style="font-size: 0.85em;">Add video files to the /videos folder</p>
+          </div>
+        `;
+                    return;
+                }
+
+                container.innerHTML = videos
+                    .map(
+                        (video) => `
+        <div class="video-item">
+          <div class="video-info">
+            <div class="video-name">📹 ${escapeHtml(video.name)}</div>
+            <div class="video-size">${video.sizeFormatted}</div>
+          </div>
+          <button class="play-btn" onclick="playVideo('${escapeHtml(video.path)}', '${escapeHtml(video.name)}')">
+            ▶ Play
+          </button>
+        </div>
+      `,
+                    )
+                    .join('');
+            }
+
+            function searchVideos() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const filtered = allVideos.filter((video) => video.name.toLowerCase().includes(searchTerm));
+                displayVideos(filtered);
+            }
+
+            function playVideo(url, name) {
+                const videoPlayer = document.getElementById('videoPlayer');
+                const videoSource = document.getElementById('videoSource');
+
+                videoSource.src = url;
+                videoPlayer.load();
+                videoPlayer.play();
+
+                document.getElementById('urlInput').value = url;
+                updateNowPlaying(name);
+                showStatus(`Now playing: ${name}`, 'success', 'player');
+            }
+
+            function playFromUrl() {
+                const url = document.getElementById('urlInput').value.trim();
+                if (!url) {
+                    showStatus('Please enter a video URL', 'error', 'player');
+                    return;
+                }
+                const videoPlayer = document.getElementById('videoPlayer');
+                const videoSource = document.getElementById('videoSource');
+
+                videoSource.src = url;
+                videoPlayer.load();
+                videoPlayer.play();
+
+                updateNowPlaying(url.split('/').pop());
+                showStatus('Playing from URL', 'success', 'player');
+            }
+
+            function stopVideo() {
+                const videoPlayer = document.getElementById('videoPlayer');
+                videoPlayer.pause();
+                videoPlayer.currentTime = 0;
+                document.getElementById('videoSource').src = '';
+                document.getElementById('urlInput').value = '';
+                updateNowPlaying(null);
+                showStatus('Video stopped', 'info', 'player');
+            }
+
+            function updateNowPlaying(videoName) {
+                const container = document.getElementById('nowPlaying');
+                if (videoName) {
+                    container.textContent = `▶️ Now Playing: ${videoName}`;
+                    container.classList.add('active');
+                } else {
+                    container.classList.remove('active');
+                }
+            }
+
+            function showStatus(message, type, context) {
+                if (context === 'player') {
+                    const el = document.getElementById('playerStatus');
+                    el.textContent = message;
+                    el.className = `status-message ${type}`;
+                    setTimeout(() => el.classList.remove(type), 3000);
+                }
+            }
+
+            function escapeHtml(text) {
+                const map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;',
+                };
+                return text.replace(/[&<>"']/g, (m) => map[m]);
+            }
+        </script>
+    </body>
+</html>

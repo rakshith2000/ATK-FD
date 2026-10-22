@@ -1,0 +1,15 @@
+node_modules/
+.env
+.env.local
+.DS_Store
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vscode/
+.idea/
+dist/
+build/
+# Do NOT ignore videos folder - only ignore node_modules
+# If you want to ignore videos, uncomment below:
+# videos/

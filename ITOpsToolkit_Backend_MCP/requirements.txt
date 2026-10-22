@@ -1,0 +1,36 @@
+# Data structures
+PyYAML
+
+# SQLAlchemy for database generalization
+asyncpg
+databases
+SQLAlchemy
+
+# PostgreSQL database connector
+pgvector
+psycopg2-binary
+# Vault specific packages# Hashicorp vault
+hvac
+# AWS vault
+boto3
+
+# Azure vault
+azure-identity
+azure-keyvault-secrets
+
+# Google cloud secret manager
+google-api-python-client
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-cloud-secret-manager
+
+# API interface - FastAPI
+fastapi[all]
+
+# MCP server specific
+fastmcp
+langchain-mcp-adapters
+
+pydantic>=2.11.10
+ 
